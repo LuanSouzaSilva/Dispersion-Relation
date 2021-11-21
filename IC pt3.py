@@ -129,6 +129,7 @@ k *= nu/(20)
 """
 A2 = np.zeros((N1, nu))
 
+#Aqui eu calculo o u_i(t) em cada frequência externa, faço a trasnformada de fourier e armazeno tudo no array A2, que tem as transformadas para cada frequencia
 for m in range(N1):
     l = int(nu/2)
     b = 0
@@ -147,6 +148,7 @@ for m in range(N1):
 k2 = []
 C = []
 TFx1 = []
+#A ideia dessa parte e ver onde tem picos, o que ocorre justamente quando A[i]>A[i-1] e A[i]>A[i-1]. Então eu armazeno todos os pontos de pico
 for i in range(N1):
     c = 0
     for j in range(nu-1):
@@ -163,7 +165,12 @@ for i in range(N1):
 w2 = []
 #k2 = []
 TFx2 = [] 
-    
+
+"""
+Aqui a minha ideia seria escolher um numero de w de uma certa regiao e ver em qual w há o maior pico,
+e então eliminar os k's que possuem um pico irrelevante. No entanto estou travado em executar minha ideia, e também não sei se ela seria a solução de fato.
+Um dos maiores problemas que tenho, inclusive, é o fato de o tempo de processamento ser muito grande.
+"""
 for i in range(len(C)):
     for j in range(C[i]):
         k2[i].append(k1[j])
@@ -174,23 +181,8 @@ for i in range(N1):
             w2.append(w[i])
             break
 
-"""          
-    for j in range(len(k1)):
-        a = comprimento[i]
-        while j > 0 and comprimento[j-1] > a:
-            comprimento[j] = comprimento[j-1]
-            i -= 1
-        comprimento[j] = a
-"""
+
 #plt.plot(k1, w1, 'o')
-
-
-"""
-plt.xlim(0, pi/a)
-plt.ylim(0, 0.003)
-plt.grid()
-plt.plot(k, A)
-"""
 
 """
 #Pedaco opcional do codigo, que plota u(t)
@@ -204,9 +196,7 @@ for i in range(N-1):
     plt.plot(tempo, u[i])
 
 plt.xlim(0, T)
-#print(u[2])
-
-#plt.show()
+plt.show()
 """
 
 tf = time.time()
