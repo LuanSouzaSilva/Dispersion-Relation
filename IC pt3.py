@@ -15,9 +15,9 @@ t = float(input('Digite o instante de tempo: '))
 a = float(input('Digite a separacao entre as massas: '))
 """
 w0 = 20
-nu = 9000#0
+nu = 10000#0
 N = 2
-T = 10
+T = 5
 t = 2.99
 a = 1 
 a0 = 0.1
@@ -64,7 +64,9 @@ def Solucao(n, num, W, W0, h):
                     udot[i][j+1] = udot[i][j] + (k1 + k4 + 2*(k2 + k3))*h/6
                 
                 
-                    u[i][j+1] = u[i][j] + udot[i][j]*h#(k11[i] + k41[i] + 2*(k21[i] + k31[i]))*h/6
+                    v12 = udot[i][j] + k1*h/2
+                
+                    u[i][j+1] = u[i][j] + v12*h  
                 else:
                     k1 = a0*np.cos(W*j*h)+(W0**2)*u[n-2][j] - 2*(W0**2)*u[i][j] + (W0**2)*u[i+1][j]
                     k2 = a0*np.cos(h*W*(j + 0.5))+(W0**2)*(u[n-2][j] + k1*h/2) - 2*(W0**2)*(u[i][j] + k1*h/2) + (W0**2)*(u[i+1][j] + k1*h/2)
@@ -75,7 +77,9 @@ def Solucao(n, num, W, W0, h):
                     udot[i][j+1] = udot[i][j] + (k1 + k4 + 2*(k2 + k3))*h/6
                 
                 
-                    u[i][j+1] = u[i][j] + udot[i][j]*h
+                    v12 = udot[i][j] + k1*h/2
+                
+                    u[i][j+1] = u[i][j] + v12*h 
             elif i + 2 == n:
                 k1 = (W0**2)*u[i-1][j] - 2*(W0**2)*u[i][j] + (W0**2)*u[0][j]
                 k2 = (W0**2)*(u[i-1][j] + k1*h/2) - 2*(W0**2)*(u[i][j] + k1*h/2) + (W0**2)*(u[0][j] + k1*h/2)
@@ -84,7 +88,9 @@ def Solucao(n, num, W, W0, h):
                 
                 udot[i][j+1] = udot[i][j] + (k1 + k4 + 2*(k2 + k3))*h/6
                 
-                u[i][j+1] = u[i][j] + udot[i][j]*h
+                v12 = udot[i][j] + k1*h/2
+                
+                u[i][j+1] = u[i][j] + v12*h 
                 
                 
             else:
@@ -96,7 +102,9 @@ def Solucao(n, num, W, W0, h):
                 
                 udot[i][j+1] = udot[i][j] + (k1 + k4 + 2*(k2 + k3))*h/6
                 
-                u[i][j+1] = u[i][j] + udot[i][j]*h
+                v12 = udot[i][j] + k1*h/2
+                
+                u[i][j+1] = u[i][j] + v12*h 
                        
     return u
 
@@ -129,7 +137,6 @@ k *= nu/(20)
 """
 A2 = np.zeros((N1, nu))
 
-#Aqui eu calculo o u_i(t) em cada frequência externa, faço a trasnformada de fourier e armazeno tudo no array A2, que tem as transformadas para cada frequencia
 for m in range(N1):
     l = int(nu/2)
     b = 0
@@ -138,51 +145,48 @@ for m in range(N1):
         for j in range(nu):
             X[i][j] = i*a + u[i][j]
 
-    A = np.fft.fft(X[1])
+    A = np.fft.fft(X[1]) #Suspeito fortemente que esta transformada de fourier e uma transformada no tempo
     A = 2*np.abs(A/nu)
     k = np.fft.fftfreq(nu)
-    k *= nu/20
+    k *= nu
     
     A2[m] = A
     
 k2 = []
-C = []
 TFx1 = []
-#A ideia dessa parte e ver onde tem picos, o que ocorre justamente quando A[i]>A[i-1] e A[i]>A[i-1]. Então eu armazeno todos os pontos de pico
+par1 = []
+par2 = []
+w2 = []
 for i in range(N1):
     c = 0
+    TFx1 = []
+    k1 = []
     for j in range(nu-1):
-        if A2[i][j] > A2[i][j-1] and A2[i][j] > A2[i][j+1] and k[j]>= -3.15 and k[j] <= 3.15 and k[j] != 0:
+        if A2[i][j] > A2[i][j-1] and A2[i][j] > A2[i][j+1] and k[j] != 0:#and k[j]>= -3.15 and k[j] <= 3.15 and k[j]!=0:
             w1.append(w[i])
             k1.append(k[j])
             TFx1.append(A2[i][j])
-            c += 1
-    if c > 0:
-        k2 += [[]]
-        C.append(c)
-
-#print(w1)
-w2 = []
-#k2 = []
-TFx2 = [] 
-
-"""
-Aqui a minha ideia seria escolher um numero de w de uma certa regiao e ver em qual w há o maior pico,
-e então eliminar os k's que possuem um pico irrelevante. No entanto estou travado em executar minha ideia, e também não sei se ela seria a solução de fato.
-Um dos maiores problemas que tenho, inclusive, é o fato de o tempo de processamento ser muito grande.
-"""
-for i in range(len(C)):
-    for j in range(C[i]):
-        k2[i].append(k1[j])
-print(k2)
-for i in range(N1):
-    for j in range(len(w1)):
-        if w[j] == w1[i]:
-            w2.append(w[i])
-            break
-
-
-#plt.plot(k1, w1, 'o')
+    if len(TFx1) > 0:
+        TFx1, k1 = zip(*sorted(zip(TFx1, k1)))
+        TFx1 = list(TFx1)
+        k1 = list(k1)
+        for l in range(len(TFx1)):
+            c = TFx1[l]
+            d = k1[l]
+            while l > 0 and TFx1[l-1] > c:
+                TFx1[l] = TFx1[l-1]
+                k1[l] = k1[l-1]
+                l -= 1
+            TFx1[l] = c
+            k1[l] = d
+        k2.append(k1[-1])
+        w2.append(w[i])
+#print(k2)
+    
+#print(B)
+#print(par2)
+#print(B)
+plt.plot(k2, w2, 'o')
 
 """
 #Pedaco opcional do codigo, que plota u(t)
@@ -196,7 +200,9 @@ for i in range(N-1):
     plt.plot(tempo, u[i])
 
 plt.xlim(0, T)
-plt.show()
+#print(u[2])
+
+#plt.show()
 """
 
 tf = time.time()
