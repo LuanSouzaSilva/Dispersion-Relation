@@ -117,10 +117,6 @@ w1 = []
 TFX = []
 N2 = 200
 
-
-
-A2 = np.zeros((N1, N1))
-N2 = 200
 for m in range(N1):
     A = np.zeros(N2)
     
