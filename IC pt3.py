@@ -1,3 +1,5 @@
+#Este programa visa calcular a relação de dispersão de fônons numa cadeia 1D
+
 import matplotlib.pyplot as plt
 import numpy as np
 import math
